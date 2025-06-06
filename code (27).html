@@ -1,0 +1,2645 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n-title="page_title">Taufiq - Profile</title>
+  <link rel="icon" href="https://i.ibb.co/0Rxb4Xvz/6366053acf26.jpg" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #0a0a15;
+      --bg-shadow: #1a1a2c;
+      --text-primary: #f5f0fa;
+      --text-secondary: #a0b0c0;
+      --accent-metal: #d0d0d8;
+      --accent-gold: #d4af37;
+      --glass-bg: rgba(255, 255, 255, 0.08); /* Slightly less opaque */
+      --card-bg: rgba(10, 15, 25, 0.9);
+      --shadow-sm: 0 3px 10px rgba(0,0,0,0.4);
+      --shadow-md: 0 8px 25px rgba(0,0,0,0.7);
+      --shadow-xl: 0 12px 40px rgba(0,0,20,0.9);
+      --neon-glow: 0 0 15px rgba(212, 175, 55, 0.5);
+      --particle-color: rgba(212, 175, 55, 0.8); /* For burst particles */
+      --liquid-bg-dark: #0a0a15; /* Base for liquid transition */
+      --liquid-bg-light: #2a2e3a;
+    }
+
+    /* Light mode variables for new elements */
+    body.light-mode {
+      --bg-dark: #2a2e3a;
+      --bg-shadow: #4a4a5e;
+      --text-primary: #fafafa;
+      --text-secondary: #c0c0c5;
+      --accent-metal: #e0e0e8;
+      --glass-bg: rgba(255, 255, 255, 0.15); /* Slightly more opaque in light */
+      --card-bg: rgba(40, 40, 50, 0.9);
+      --particle-color: rgba(224, 224, 232, 0.6);
+      --liquid-bg-dark: #2a2e3a;
+      --liquid-bg-light: #f5f0fa; /* Or adjust to a lighter shade */
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+      -webkit-tap-highlight-color: transparent;
+      cursor: auto; /* Ensure default cursor is back */
+    }
+
+    body {
+      font-family: 'Roboto Mono', monospace;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      position: relative;
+      transition: background-color 0.5s ease, color 0.5s ease;
+      font-size: 16px;
+      line-height: 1.6;
+      /* OPTIMASI: Anti-aliasing untuk font */
+      -webkit-font-smoothing: antialiased; /* Untuk browser WebKit (Chrome, Safari, Edge) pada macOS */
+      -moz-osx-font-smoothing: grayscale; /* Untuk browser Firefox pada macOS */
+      text-rendering: optimizeLegibility; /* Mengoptimalkan rendering teks untuk keterbacaan */
+    }
+
+    /* Scanline/CRT Overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10000; /* Above everything but loader/modal */
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.03), /* OPTIMASI: Mengurangi intensitas scanline */
+        rgba(0, 0, 0, 0.03) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      mix-blend-mode: overlay; /* Or screen, soft-light */
+      opacity: 0.03; /* OPTIMASI: Mengurangi opacity dari 0.05 menjadi 0.03 */
+      animation: scanlineFadeIn 1s forwards; /* subtle fade in */
+    }
+
+    @keyframes scanlineFadeIn {
+        from { opacity: 0; }
+        to { opacity: 0.03; } /* Keep it subtle */
+    }
+
+    body.light-mode::before {
+        background: repeating-linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 0.02), /* OPTIMASI: Mengurangi intensitas scanline di light mode */
+            rgba(255, 255, 255, 0.02) 1px,
+            transparent 1px,
+            transparent 2px
+        );
+        opacity: 0.02; /* OPTIMASI: Mengurangi opacity di light mode */
+    }
+
+    #wave-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -3;
+    }
+
+    .loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+      flex-direction: column;
+    }
+
+    .loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loader.hidden[style*="display: none"] {
+        display: none !important;
+    }
+
+    .loader-inner-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .loader-logo {
+      font-family: 'VT323', monospace;
+      font-size: clamp(3rem, 8vw, 4.5rem);
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      position: relative;
+      animation: glitch 0.8s linear infinite;
+    }
+
+    .loader-logo::before,
+    .loader-logo::after {
+      content: 'Taufiq'; /* Loader name intentionally not translated */
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: var(--accent-gold);
+    }
+
+    .loader-logo::before {
+      clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+      transform: translateX(-2px);
+      animation: glitchShift 0.5s linear infinite;
+    }
+
+    .loader-logo::after {
+      clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+      transform: translateX(2px);
+      animation: glitchShift 0.7s linear infinite;
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: translateY(0); }
+      20% { transform: translateY(-1px); }
+      40% { transform: translateY(1px); }
+    }
+
+    @keyframes glitchShift {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-3px); }
+      40% { transform: translateX(3px); }
+    }
+
+    .loader-message {
+      font-family: 'Roboto Mono', monospace;
+      font-size: clamp(1.2rem, 4vw, 1.5rem);
+      color: var(--text-secondary);
+      margin-top: 15px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .progress-bar-container {
+      width: clamp(200px, 60vw, 350px);
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 5px;
+      margin-top: 30px;
+      overflow: hidden;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+    }
+
+    .progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(212,175,55,0.5), var(--accent-gold));
+      border-radius: 5px;
+      transition: width 0.2s linear;
+      box-shadow: var(--neon-glow);
+    }
+
+    .loader-quote {
+      font-family: 'Roboto Mono', monospace;
+      font-size: clamp(0.9rem, 3vw, 1.1rem);
+      color: var(--text-secondary);
+      margin-top: 15px;
+      max-width: 350px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      text-align: center;
+    }
+
+    .loader-particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .loader-particle {
+      position: absolute;
+      background: var(--accent-gold);
+      border-radius: 50%;
+      opacity: 0.8;
+      box-shadow: 0 0 8px rgba(212, 175, 55, 0.7);
+      transform: translate(-50%, -50%);
+      animation: orbit 2s linear infinite;
+    }
+    body.light-mode .loader-particle {
+        background: var(--accent-metal);
+        box-shadow: 0 0 8px rgba(224, 224, 232, 0.7);
+    }
+
+    .loader-particle:nth-child(1) { width: 6px; height: 6px; top: 48%; left: 45%; animation-delay: 0s; transform: translate(-50%, -50%) rotate(0deg) translateX(40px) rotate(0deg); }
+    .loader-particle:nth-child(2) { width: 8px; height: 8px; top: 52%; left: 55%; animation-delay: -0.5s; transform: translate(-50%, -50%) rotate(90deg) translateX(40px) rotate(-90deg); }
+    .loader-particle:nth-child(3) { width: 5px; height: 5px; top: 45%; left: 52%; animation-delay: -1s; transform: translate(-50%, -50%) rotate(180deg) translateX(40px) rotate(-180deg); }
+    .loader-particle:nth-child(4) { width: 7px; height: 7px; top: 55%; left: 48%; animation-delay: -1.5s; transform: translate(-50%, -50%) rotate(270deg) translateX(40px) rotate(-270deg); }
+
+
+    @keyframes orbit {
+      0% { transform: translate(-50%, -50%) rotate(0deg) translateX(40px) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg) translateX(40px) rotate(-360deg); }
+    }
+
+    .cursor-trail {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .trail-particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: var(--accent-gold);
+      border-radius: 50%;
+      opacity: 0;
+      box-shadow: 0 0 8px rgba(212, 175, 55, 0.7);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      filter: blur(1px); /* Subtle blur */
+    }
+    body.light-mode .trail-particle {
+      background: var(--accent-metal);
+      box-shadow: 0 0 8px rgba(224, 224, 232, 0.7);
+    }
+
+    .theme-burst {
+      position: fixed;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .burst-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--particle-color);
+      border-radius: 50%;
+      opacity: 0.8;
+      box-shadow: 0 0 6px var(--particle-color);
+    }
+
+    .navbar {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1000;
+    }
+
+    .menu-toggle {
+      width: 40px;
+      height: 40px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
+      border: 2px solid var(--accent-metal);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.3s ease;
+    }
+
+    .menu-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .menu-toggle span {
+      width: 20px;
+      height: 2px;
+      background: var(--text-primary);
+      position: relative;
+      transition: all 0.2s ease; /* FASTER */
+    }
+
+    .menu-toggle span::before,
+    .menu-toggle span::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 2px;
+      background: var(--text-primary);
+      left: 0;
+      transition: all 0.2s ease; /* FASTER */
+    }
+
+    .menu-toggle span::before {
+      top: -6px;
+    }
+
+    .menu-toggle span::after {
+      bottom: -6px;
+    }
+
+    .menu-toggle.active span {
+      background: transparent;
+    }
+
+    .menu-toggle.active span::before {
+      transform: rotate(45deg) translate(5px, 5px);
+      background: var(--text-primary);
+    }
+
+    .menu-toggle.active span::after {
+      transform: rotate(-45deg) translate(5px, -5px);
+      background: var(--text-primary);
+    }
+
+    .nav-menu {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 80%;
+      max-width: 300px;
+      height: 100%;
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: left 0.3s ease; /* FASTER */
+      z-index: 999;
+    }
+
+    .nav-menu.active {
+      left: 0;
+    }
+
+    .nav-menu a {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-family: 'VT323', monospace;
+      font-size: clamp(1.6rem, 6vw, 2.2rem);
+      margin: 20px 0;
+      text-transform: uppercase;
+      position: relative;
+      transition: color 0.2s ease, transform 0.2s ease; /* FASTER */
+    }
+
+    .nav-menu a:hover {
+      color: var(--accent-gold);
+      transform: scale(1.1);
+    }
+
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent-gold);
+      transition: width 0.3s ease;
+    }
+
+    .nav-menu a:hover::after {
+      width: 100%;
+    }
+
+    /* Common button styles for fixed buttons */
+    .fixed-action-btn {
+        position: fixed;
+        width: 36px;
+        height: 36px;
+        background: var(--card-bg);
+        color: var(--text-primary);
+        border: 2px solid var(--accent-metal);
+        border-radius: 50%;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-sm);
+        cursor: pointer;
+        z-index: 1000;
+        transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease, opacity 0.3s ease, visibility 0.3s ease; /* FASTER TRANSFORM */
+    }
+
+    .fixed-action-btn:hover {
+        background: var(--accent-gold);
+        transform: scale(1.1);
+        box-shadow: var(--shadow-md);
+        color: var(--bg-dark);
+    }
+
+    /* Specific positioning for each button */
+    .theme-btn {
+      top: 15px;
+      right: 15px;
+    }
+
+    .visits-counter {
+      top: 15px;
+      right: 60px;
+      width: auto;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-family: 'VT323', monospace;
+      font-size: clamp(1rem, 3vw, 1.1rem);
+      display: flex;
+      gap: 6px;
+    }
+    .visits-counter:hover {
+        transform: translateY(-2px);
+    }
+    .visits-counter .visits-icon {
+        font-size: 0.9em;
+    }
+
+    .language-toggle-btn {
+        top: 15px;
+        right: 140px;
+        font-family: 'VT323', monospace;
+    }
+    .language-toggle-btn:hover {
+        transform: scale(1.1) rotate(15deg);
+    }
+
+    /* New Scroll-to-Top button */
+    #scrollToTopBtn {
+        bottom: 65px; /* Above voice button */
+        right: 15px;
+        font-size: 1.5rem;
+        display: none; /* Hidden by default */
+        opacity: 0;
+        visibility: hidden;
+    }
+    #scrollToTopBtn.show {
+        display: flex;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .voice-btn {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      width: 40px;
+      height: 40px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 2px solid var(--accent-metal);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      z-index: 1000;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .voice-btn.listening {
+      transform: scale(0.9);
+      border-color: var(--accent-gold);
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.5); }
+      70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+    }
+
+    /* New: Particle burst container for cool buttons */
+    .button-particle-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+    }
+    .button-particle {
+        position: absolute;
+        background: var(--accent-gold);
+        border-radius: 50%;
+        opacity: 0;
+        animation: emitParticles 0.8s forwards;
+        box-shadow: 0 0 5px var(--accent-gold);
+        filter: blur(1px);
+    }
+    body.light-mode .button-particle {
+        background: var(--accent-metal);
+        box-shadow: 0 0 5px var(--accent-metal);
+    }
+    @keyframes emitParticles {
+        0% { transform: scale(0) translate(0, 0); opacity: 1; }
+        100% { transform: scale(1) translate(var(--dx), var(--dy)); opacity: 0; }
+    }
+
+    .cool-btn {
+      display: inline-block;
+      width: 100%;
+      max-width: 150px;
+      padding: 10px 20px;
+      margin: 8px auto;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      text-decoration: none;
+      font-family: 'VT323', monospace;
+      font-size: clamp(1rem, 4vw, 1.2rem);
+      text-transform: uppercase;
+      text-align: center;
+      border: 2px solid var(--accent-metal);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+      transform: perspective(1000px) rotateX(0deg);
+      transition: transform 0.2s ease, box-shadow 0.3s ease, color 0.3s ease; /* FASTER TRANSFORM */
+      cursor: pointer;
+      z-index: 1; /* For particle container */
+      /* OPTIMASI: Tambahkan border-radius (sebelumnya hilang) */
+      border-radius: 8px;
+    }
+
+    .cool-btn:hover {
+      transform: perspective(1000px) rotateX(5px) translateY(-3px);
+      box-shadow: var(--shadow-md);
+      color: var(--accent-gold);
+      border-color: var(--accent-gold);
+    }
+
+    .cool-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(212, 175, 55, 0.2);
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      opacity: 0;
+      transition: width 0.2s ease, height 0.2s ease, opacity 0.4s ease;
+    }
+
+    .cool-btn:active::before {
+      width: 300px;
+      height: 300px;
+      opacity: 1;
+    }
+
+    body.light-mode .card,
+    body.light-mode .achievement-card,
+    body.light-mode .project-card,
+    body.light-mode .contact-card,
+    body.light-mode .contact-form {
+      background: var(--card-bg);
+      border: 2px solid var(--accent-metal);
+    }
+
+    body.light-mode .trail-particle,
+    body.light-mode .burst-particle {
+      background: var(--accent-metal);
+      box-shadow: 0 0 6px rgba(224, 224, 232, 0.3);
+    }
+
+    body.light-mode .cool-btn,
+    body.light-mode .fixed-action-btn,
+    body.light-mode .voice-btn {
+      background: var(--card-bg);
+      border-color: var(--accent-metal);
+      color: var(--text-primary);
+    }
+
+    body.light-mode .cool-btn:hover,
+    body.light-mode .fixed-action-btn:hover,
+    body.light-mode .voice-btn:hover {
+      background: var(--accent-metal);
+      color: var(--bg-dark);
+      box-shadow: var(--shadow-md);
+    }
+
+    body.light-mode .cool-btn::before,
+    body.light-mode .fixed-action-btn::before,
+    body.light-mode .voice-btn::before {
+      background: rgba(224, 224, 232, 0.2);
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: min(5vw, 40px);
+      background: linear-gradient(to bottom, rgba(0,0,10,0.3), var(--bg-shadow));
+      box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+      overflow: hidden;
+    }
+
+    .hero-content {
+      text-align: center;
+      width: 100%;
+      padding: min(5vw, 20px);
+      z-index: 2;
+    }
+
+    .greeting-text, .motivation-quote {
+      font-family: 'VT323', monospace; /* Tetap VT323 jika diinginkan efek pixel */
+      color: var(--accent-gold);
+      margin-bottom: 10px;
+      text-shadow: var(--neon-glow);
+    }
+    .greeting-text {
+        font-size: clamp(1.5rem, 5vw, 2rem);
+    }
+    .motivation-quote {
+        font-family: 'Roboto Mono', monospace; /* Roboto Mono lebih halus */
+        font-size: clamp(1rem, 3.5vw, 1.2rem);
+        color: var(--text-secondary);
+        margin-top: 20px;
+        font-style: italic;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    /* Emojis in heading/quote/labels */
+    .greeting-text span, .motivation-quote span, section h2 span, .contact-card p span, .skill-bar h4 span {
+        margin-right: 8px; /* Space between emoji and text */
+        vertical-align: middle; /* Align emoji vertically */
+        font-size: 1.1em; /* Slightly larger emoji for emphasis */
+    }
+    /* Specific styling for modal status text emoji to match its parent */
+    .modal-status span {
+        margin-right: 8px;
+        vertical-align: middle;
+        font-size: 1em; /* Smaller emoji for a more integrated look */
+    }
+
+    .hero h1 {
+      font-family: 'VT323', monospace; /* Tetap VT323 jika diinginkan efek pixel */
+      font-size: clamp(3rem, 8vw, 4.5rem);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-primary);
+      position: relative;
+      animation: glitch 0.5s infinite;
+    }
+
+    .hero h1::before,
+    .hero h1::after {
+      content: attr(data-original-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: var(--text-primary);
+    }
+
+    .hero h1::before {
+      clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+      transform: translateX(-2px);
+      animation: glitchShift 0.3s infinite;
+    }
+
+    .hero h1::after {
+      clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+      transform: translateX(2px);
+      animation: glitchShift 0.4s infinite;
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: translateY(0); }
+      20% { transform: translateY(-1px); }
+      40% { transform: translateY(1px); }
+    }
+
+    @keyframes glitchShift {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-3px); }
+      40% { transform: translateX(3px); }
+    }
+
+    .hero p.typing-text {
+      font-size: clamp(1.1rem, 4vw, 1.3rem);
+      margin: 1rem 0;
+      color: var(--text-secondary);
+      position: relative;
+      display: inline-block;
+      font-family: 'Roboto Mono', monospace; /* Ini juga bisa diubah ke Roboto Mono agar lebih halus */
+    }
+
+    .hero p.typing-text::after {
+      content: '|';
+      position: absolute;
+      right: -10px;
+      color: var(--accent-gold);
+      animation: blink 0.7s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .ar-card {
+      width: 100%;
+      max-width: 300px;
+      height: 200px;
+      margin: 20px auto;
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      border: 2px solid var(--accent-metal);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .hero-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    .hero-buttons .cool-btn {
+        width: 100%;
+        max-width: 200px;
+        margin: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 60px min(5vw, 40px);
+    }
+
+    section {
+      margin: 80px 0;
+      opacity: 0;
+      transform: translateY(30px) scale(0.95); /* Initial smaller scale and blur */
+      filter: blur(5px);
+      transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease; /* FASTER TRANSITION */
+      will-change: transform, opacity, filter;
+    }
+
+    section.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0px);
+    }
+
+    section h2 {
+      font-family: 'VT323', monospace; /* Tetap VT323 jika diinginkan efek pixel */
+      font-size: clamp(2.2rem, 6vw, 2.8rem);
+      text-align: center;
+      margin-bottom: 30px;
+      color: var(--text-primary);
+      position: relative;
+      text-shadow: 0 0 8px rgba(212, 175, 55, 0.3); /* Subtle glow */
+    }
+    body.light-mode section h2 {
+      text-shadow: 0 0 8px rgba(224, 224, 232, 0.3);
+    }
+
+    section h2.glitch-active::before,
+    section h2.glitch-active::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: var(--accent-gold);
+      animation: glitchShift 0.3s ease-in-out;
+    }
+
+    section h2.glitch-active::before {
+      transform: translateX(-2px);
+      clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+    }
+
+    section h2.glitch-active::after {
+      transform: translateX(2px);
+      clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+    }
+
+    /* General card hover effect with subtle light reflection */
+    .about-card, .achievement-card, .skill-bar, .contact-card, .project-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(8px);
+        border: 2px solid var(--accent-metal);
+        border-radius: 10px;
+        padding: min(5vw, 30px);
+        box-shadow: var(--shadow-md);
+        transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        perspective: 1000px; /* For 3D transforms */
+    }
+
+    .about-card:hover, .achievement-card:hover, .skill-bar:hover, .contact-card:hover, .project-card:hover {
+        transform: translateY(-8px) scale(1.01);
+        box-shadow: var(--shadow-xl);
+        border-color: var(--accent-gold);
+    }
+
+    .about-card::after, .achievement-card::after, .skill-bar::after, .contact-card::after, .project-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        z-index: 2; /* Ensure reflection is above card content */
+    }
+    body.light-mode .about-card::after, body.light-mode .achievement-card::after, body.light-mode .skill-bar::after, body.light-mode .contact-card::after, body.light-mode .project-card::after {
+        background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0, 0, 0, 0.05) 0%, transparent 70%);
+    }
+
+    .about-card:hover::after, .achievement-card:hover::after, .skill-bar:hover::after, .contact-card:hover::after, .project-card:hover::after {
+        opacity: 1;
+    }
+
+    .about-card p {
+      font-size: clamp(1rem, 3vw, 1.1rem);
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      padding: min(5vw, 20px);
+    }
+
+    .achievement-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      filter: grayscale(1);
+      transition: transform 0.5s ease, filter 0.5s ease;
+      position: relative; /* For z-index stacking with ::after */
+      z-index: 1;
+    }
+
+    .achievement-card:hover img {
+      transform: scale(1.05);
+      filter: grayscale(0); /* Colorize on hover */
+    }
+
+    .achievement-card .content {
+      padding: min(5vw, 20px);
+      position: relative;
+      z-index: 1; /* For stacking with ::after */
+    }
+
+    .achievement-card h3 {
+      font-family: 'VT323', monospace; /* Tetap VT323 jika diinginkan efek pixel */
+      font-size: clamp(1.5rem, 5vw, 1.9rem);
+      margin-bottom: 10px;
+      color: var(--text-primary);
+    }
+
+    .achievement-card p {
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      color: var(--text-secondary);
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      padding: min(5vw, 20px);
+      margin-top: 40px;
+    }
+
+    .skill-bar {
+      background: var(--card-bg);
+      padding: min(3vw, 20px);
+      border-radius: 8px;
+      border: 2px solid var(--accent-metal);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .skill-bar:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .skill-bar h4 {
+      font-family: 'VT323', monospace; /* Tetap VT323 jika diinginkan efek pixel */
+      font-size: clamp(1.2rem, 4vw, 1.4rem);
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex; /* Allow content inside to align */
+      align-items: center;
+      gap: 8px; /* Space between emoji and text */
+    }
+
+    /* NEW: Skill Percentage display */
+    .skill-bar h4 .skill-percentage {
+        font-family: 'Roboto Mono', monospace; /* Roboto Mono lebih halus */
+        font-size: 0.9em; /* Slightly smaller than title */
+        color: var(--text-secondary);
+        opacity: 0;
+        transition: opacity 0.3s ease 0.2s; /* FASTER Delay fade in */
+        vertical-align: middle;
+        margin-left: auto; /* Push to the right */
+        background: rgba(255, 255, 255, 0.05);
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .skill-bar.visible h4 .skill-percentage { /* Show when skill bar section is visible */
+        opacity: 1;
+    }
+
+    /* NEW: Progress bar flowing effect */
+    .skill-bar .progress {
+      width: 0;
+      height: 12px;
+      background: linear-gradient(90deg, rgba(212,175,55,0.5), var(--accent-gold));
+      border-radius: 5px; /* Fixed: From 50% to 5px to match other progress bars */
+      transition: width 1s ease;
+      position: relative;
+      box-shadow: 0 0 10px var(--accent-gold);
+      overflow: hidden; /* Hide the gradient overflow */
+    }
+    body.light-mode .skill-bar .progress {
+        background: linear-gradient(90deg, rgba(224,224,232,0.5), var(--accent-metal));
+        box-shadow: 0 0 10px var(--accent-metal);
+    }
+
+    .skill-bar .progress.filled {
+      width: var(--progress-width);
+    }
+
+    .skill-bar .progress.filled::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 200%; /* Wider than progress bar */
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        animation: flowEffect 2s linear infinite;
+        transform: translateX(-100%);
+    }
+
+    @keyframes flowEffect {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .skill-bar .tooltip {
+      position: absolute;
+      top: -45px;
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      background: var(--card-bg);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: 5px;
+      border: 1px solid var(--accent-metal);
+      font-size: clamp(0.85rem, 3vw, 1rem);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      white-space: nowrap;
+      z-index: 10;
+    }
+
+    .skill-bar:hover .tooltip {
+      transform: translateX(-50%) scale(1);
+      opacity: 1;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      padding: min(5vw, 20px);
+    }
+
+    .project-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--accent-metal);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+      position: relative;
+      height: 380px; /* Fixed height for consistency */
+      cursor: pointer;
+      display: flex;
+      flex-direction: column; /* Ensure content stacks vertically */
+      perspective: 1000px; /* For 3D transforms */
+    }
+
+    .project-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: var(--shadow-xl), var(--neon-glow);
+      border-color: var(--accent-gold);
+    }
+
+    /* NEW: Project New Badge */
+    .project-new-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: var(--accent-gold);
+        color: var(--bg-dark);
+        padding: 4px 10px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        font-family: 'VT323', monospace; /* Tetap VT323 jika diinginkan efek pixel */
+        z-index: 3; /* Above card content and image */
+        transform: rotate(5deg);
+        box-shadow: var(--shadow-sm);
+        text-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+    body.light-mode .project-new-badge {
+        background: var(--accent-metal);
+        color: var(--bg-dark);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .project-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+      position: relative; /* For z-index stacking with ::after */
+      z-index: 1;
+    }
+
+    .project-card:hover img {
+      transform: scale(1.1);
+    }
+
+    .project-card .content {
+      padding: min(4vw, 20px);
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1; /* Allow content to fill available space */
+      position: relative; /* For z-index stacking with ::after */
+      z-index: 1;
+    }
+
+    .project-card h3 {
+      font-family: 'VT323', monospace; /* Tetap VT323 jika diinginkan efek pixel */
+      font-size: clamp(1.5rem, 4.5vw, 1.7rem);
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .project-card p {
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      color: var(--text-secondary);
+      line-height: 1.5;
+      /* Removed flex-grow: 1; to prevent it from consuming too much space */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3; /* Visually limit to 3 lines */
+      -webkit-box-orient: vertical;
+      margin-bottom: 12px;
+      /* Optional: Add a max-height to ensure it doesn't push elements out */
+      max-height: calc(1.5em * 3); /* line-height * line-clamp */
+    }
+
+    .project-card .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: auto; /* Pushes button-group to the bottom of the card */
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative; /* For z-index stacking with ::after */
+      z-index: 1;
+    }
+    .project-card .cool-btn {
+        max-width: 120px;
+        padding: 8px 15px;
+        font-size: clamp(1rem, 3vw, 1.1rem);
+        margin: 5px auto;
+    }
+
+    .project-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .project-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      border: 2px solid var(--accent-gold);
+      border-radius: 12px;
+      max-width: 700px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: min(5vw, 30px);
+      transform: scale(0.8);
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+
+    .project-modal.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.8rem;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .modal-close:hover {
+      color: var(--accent-gold);
+    }
+
+    .modal-content h3 {
+      font-family: 'VT323', monospace; /* Tetap VT323 jika diinginkan efek pixel */
+      font-size: clamp(1.9rem, 5vw, 2.2rem);
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .modal-content p {
+      font-size: clamp(1rem, 3vw, 1.1rem);
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .modal-content .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .modal-content .tech-badge {
+      background: rgba(212, 175, 55, 0.2);
+      color: var(--accent-gold);
+      font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+      padding: 4px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--accent-gold);
+    }
+
+    .modal-content .modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .modal-content .cool-btn {
+        max-width: 180px;
+        padding: 10px 20px;
+        font-size: clamp(1rem, 4vw, 1.2rem);
+        margin: 8px auto;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      padding: min(5vw, 20px);
+    }
+
+    .contact-card p {
+      font-size: clamp(1rem, 3vw, 1.1rem);
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      cursor: pointer;
+      position: relative;
+    }
+    /* Copied message style */
+    .contact-card .copied-message {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -100%) scale(0);
+        background: var(--accent-gold);
+        color: var(--bg-dark);
+        padding: 4px 10px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        opacity: 0;
+        transition: transform 0.2s ease, opacity 0.2s ease; /* FASTER */
+        white-space: nowrap;
+        z-index: 10;
+        pointer-events: none;
+    }
+    .contact-card .copied-message.show {
+        transform: translate(-50%, -120%) scale(1);
+        opacity: 1;
+    }
+
+    .contact-card a {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s ease;
+    }
+
+    .contact-card a:hover {
+      color: var(--accent-gold);
+    }
+
+    .contact-form {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      border: 2px solid var(--accent-gold);
+      border-radius: 12px;
+      padding: min(5vw, 30px);
+      box-shadow: var(--shadow-md);
+      margin-top: 30px;
+      transition: transform 0.4s ease;
+    }
+
+    .contact-form:hover {
+      transform: translateY(-5px);
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      background: none;
+      border: 2px solid var(--accent-metal);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: 'Roboto Mono', monospace; /* Roboto Mono lebih halus */
+      font-size: clamp(1rem, 3vw, 1.1rem);
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.3s ease;
+    }
+
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      outline: none;
+      border-color: var(--accent-gold);
+    }
+
+    .contact-form button {
+      width: 100%;
+      padding: 12px;
+      background: none;
+      color: var(--text-primary);
+      border: 2px solid var(--accent-gold);
+      border-radius: 8px;
+      font-family: 'VT323', monospace; /* Tetap VT323 jika diinginkan efek pixel */
+      font-size: clamp(1.2rem, 4vw, 1.4rem);
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease;
+    }
+
+    .contact-form button:hover {
+      background: var(--accent-gold);
+      color: var(--bg-dark);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Contact form message */
+    .contact-form-message {
+      text-align: center;
+      margin-top: 15px;
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      opacity: 0;
+      transition: opacity 0.2s ease, color 0.2s ease; /* FASTER */
+      visibility: hidden;
+    }
+    .contact-form-message.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    .contact-form-message.success {
+        color: limegreen;
+    }
+    .contact-form-message.error {
+        color: tomato;
+    }
+
+    /* Media queries adjustments for better desktop/larger tablet experience */
+    @media (min-width: 480px) {
+      .hero h1 { font-size: clamp(2.8rem, 6vw, 3.5rem); }
+      .hero p.typing-text { font-size: clamp(1.1rem, 4vw, 1.3rem); }
+      section h2 { font-size: clamp(2.2rem, 5vw, 2.8rem); }
+      .achievement-card img { height: 180px; }
+      .project-card img { height: 200px; }
+      .skills-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+      .projects-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+      .contact-grid { grid-template-columns: repeat(2, 1fr); }
+      .visits-counter { right: 65px; font-size: 1rem; }
+      .theme-btn { right: 20px; }
+      .language-toggle-btn { right: 150px; }
+    }
+
+    @media (min-width: 768px) {
+      .container { padding: 80px min(3vw, 60px); }
+      .skills-grid { grid-template-columns: repeat(2, 1fr); }
+      .projects-grid { grid-template-columns: repeat(3, 1fr); }
+      .contact-grid { grid-template-columns: repeat(3, 1fr); }
+      .modal-content { max-width: 800px; }
+      .visits-counter { right: 70px; font-size: 1.1rem; padding: 10px 15px; }
+      .theme-btn { right: 25px; }
+      .language-toggle-btn { right: 160px; }
+      .navbar { top: 25px; left: 25px; }
+    }
+
+    @media (min-width: 1024px) {
+      .hero h1 { font-size: 4.5rem; }
+      .hero p.typing-text { font-size: 1.5rem; }
+      section h2 { font-size: 3rem; }
+      .skills-grid { grid-template-columns: repeat(3, 1fr); }
+      .project-card { height: 420px; }
+      .project-card img { height: 220px; }
+      .contact-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+      .language-toggle-btn { right: 170px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <div class="loader-inner-content">
+      <div class="loader-logo">Taufiq</div>
+      <div class="loader-message" data-i18n="loader_greeting"></div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+      <div class="loader-quote" id="loaderQuote"></div>
+    </div>
+    <div class="loader-particles">
+      <div class="loader-particle"></div>
+      <div class="loader-particle"></div>
+      <div class="loader-particle"></div>
+      <div class="loader-particle"></div>
+    </div>
+  </div>
+
+  <div id="wave-bg"></div>
+
+  <div class="cursor-trail"></div>
+
+  <div class="theme-burst"></div>
+
+  <nav class="navbar">
+    <button type="button" class="menu-toggle" id="hamburger" aria-label="Toggle navigation menu">
+      <span id="icon"></span>
+    </button>
+    <div class="nav-menu" id="nav-menu">
+      <a href="#hero" data-i18n="nav_home">Beranda</a>
+      <a href="#about" data-i18n="nav_about">Tentang</a>
+      <a href="#achievements" data-i18n="nav_achievements">Prestasi</a>
+      <a href="#skills" data-i18n="nav_skills">Keterampilan</a>
+      <a href="#projects" data-i18n="nav_projects">Project</a>
+      <a href="#contact" data-i18n="nav_contact">Kontak</a>
+    </div>
+  </nav>
+
+  <button type="button" class="fixed-action-btn theme-btn" id="theme-toggle-btn" data-i18n-title="theme_toggle_title" aria-label="Toggle theme (light/dark)">☾</button>
+  <div class="fixed-action-btn visits-counter" id="visits-counter" data-i18n-title="visits_counter_title" aria-label="Total website visits">
+    <span class="visits-icon">👁️</span> <span id="visit-count-display">0</span>
+  </div>
+  <button type="button" class="fixed-action-btn language-toggle-btn" id="language-toggle-btn" data-i18n-title="language_toggle_title" aria-label="Change language (English/Indonesian)">EN</button>
+
+  <button type="button" id="scrollToTopBtn" class="fixed-action-btn" aria-label="Scroll to top">⬆️</button>
+
+  <button type="button" class="voice-btn" id="voice-btn" data-i18n-title="voice_btn_title" aria-label="Activate voice commands">🎤</button>
+
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <p class="greeting-text" data-i18n="hero_greeting"></p>
+      <h1 data-i18n="hero_title" data-original-text="Taufiq">Taufiq</h1>
+      <p class="typing-text"></p>
+      <p class="motivation-quote" data-i18n="hero_static_quote"></p>
+      <div class="ar-card">
+        <img src="https://i.postimg.cc/cCFkf2sp/d8b7ad80-41a9-11f0-838f-9d08c28675e5.jpg" alt="Foto Taufiq" style="width:100%; height:100%; object-fit:cover; border-radius:10px;">
+      </div>
+      <div class="hero-buttons">
+        <a href="#contact" class="cool-btn" data-i18n="button_contact"><div class="button-particle-container"></div>Hubungi</a>
+        <a href="cv.pdf" class="cool-btn" download data-i18n="button_download_cv"><div class="button-particle-container"></div>Unduh CV</a>
+        <a href="https://wa.me/+6287784720840" class="cool-btn" target="_blank" data-i18n="button_whatsapp"><div class="button-particle-container"></div>WhatsApp</a>
+        <a href="https://instagram.com/taufiqi_xyz" class="cool-btn" target="_blank" data-i18n="button_instagram"><div class="button-particle-container"></div>Instagram</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <section id="about">
+      <h2 data-i18n="about_heading">Tentang</h2>
+      <div class="about-card">
+        <p data-i18n="about_paragraph">Saya Mohammad Noor Taufiqillah, akrab disapa Taufiq, pelajar kelas 12 di MA Nahdlatul Muslimin, Undaan Kidul, Kudus. Tinggal di Loram Wetan, Kecamatan Jati, Kabupaten Kudus, Jawa Tengah. Pendiam, tapi penuh semangat untuk berinovasi!</p>
+      </div>
+    </section>
+
+    <section id="achievements">
+      <h2 data-i18n="achievements_heading">Prestasi</h2>
+      <div class="achievements-grid">
+        <div class="achievement-card">
+          <img src="https://i.postimg.cc/kgbw5Bb3/bc6dd0417bed320d5632e522154a227b-2.jpg" alt="Prestasi 1">
+          <div class="content">
+            <h3 data-i18n="achievement1_title">Belum diisi</h3>
+            <p data-i18n="achievement1_description">not yet.</p>
+          </div>
+        </div>
+        <div class="achievement-card">
+          <img src="https://i.postimg.cc/kgbw5Bb3/bc6dd0417bed320d5632e522154a227b-2.jpg" alt="Prestasi 2">
+          <div class="content">
+            <h3 data-i18n="achievement2_title">Belum Diisi</h3>
+            <p data-i18n="achievement2_description">not yet.</p>
+          </div>
+        </div>
+        <div class="achievement-card">
+          <img src="https://i.postimg.cc/kgbw5Bb3/bc6dd0417bed320d5632e522154a227b-2.jpg" alt="Prestasi 3">
+          <div class="content">
+            <h3 data-i18n="achievement3_title">Belum Diisi</h3>
+            <p data-i18n="achievement3_description">not yet.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills">
+      <h2 data-i18n="skills_heading">Keterampilan</h2>
+      <div class="skills-grid">
+        <div class="skill-bar" data-progress="80">
+          <h4 data-i18n="skill_public_speaking_title">🗣️ Public Speaking <span class="skill-percentage"></span></h4>
+          <div class="progress"></div>
+          <div class="tooltip" data-i18n="skill_public_speaking_tooltip">Berbicara di depan umum dengan percaya diri</div>
+        </div>
+        <div class="skill-bar" data-progress="75">
+          <h4 data-i18n="skill_management_title">📈 Manajemen <span class="skill-percentage"></span></h4>
+          <div class="progress"></div>
+          <div class="tooltip" data-i18n="skill_management_tooltip">Manajemen proyek dan waktu</div>
+        </div>
+        <div class="skill-bar" data-progress="70">
+          <h4 data-i18n="skill_research_title">🔍 Research <span class="skill-percentage"></span></h4>
+          <div class="progress"></div>
+          <div class="tooltip" data-i18n="skill_research_tooltip">Penelitian dan analisis data</div>
+        </div>
+        <div class="skill-bar" data-progress="85">
+          <h4 data-i18n="skill_leadership_title">👑 Leadership <span class="skill-percentage"></span></h4>
+          <div class="progress"></div>
+          <div class="tooltip" data-i18n="skill_leadership_tooltip">Memimpin tim dengan efektif</div>
+        </div>
+        <div class="skill-bar" data-progress="65">
+          <h4 data-i18n="skill_writing_title">✍️ Writing <span class="skill-percentage"></span></h4>
+          <div class="progress"></div>
+          <div class="tooltip" data-i18n="skill_writing_tooltip">Menulis kreatif dan teknis</div>
+        </div>
+        <div class="skill-bar" data-progress="90">
+          <h4 data-i18n="skill_problem_solving_title">🧩 Problem Solving <span class="skill-percentage"></span></h4>
+          <div class="progress"></div>
+          <div class="tooltip" data-i18n="skill_problem_solving_tooltip">Mampu menemukan solusi inovatif</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <h2 data-i18n="projects_heading">Project</h2>
+      <div class="projects-grid">
+        <div class="project-card" data-project-id="1">
+          <span class="project-new-badge" data-i18n="project_new_label">NEW!</span>
+          <img src="https://i.postimg.cc/kgbw5Bb3/bc6dd0417bed320d5632e522154a227b-2.jpg" alt="Project 1">
+          <div class="content">
+            <h3 data-i18n="project1_card_title">Project 1</h3>
+            <p data-i18n="project1_card_description">Aplikasi web inovatif untuk meningkatkan produktivitas.</p>
+            <div class="button-group">
+              <button type="button" class="cool-btn view-details" data-project-id="1" data-i18n="button_detail"><div class="button-particle-container"></div>Detail</button>
+              <a href="#" class="cool-btn" target="_blank" data-i18n="button_live_demo"><div class="button-particle-container"></div>Live Demo</a>
+            </div>
+          </div>
+        </div>
+        <div class="project-card" data-project-id="2">
+          <span class="project-new-badge" data-i18n="project_new_label">NEW!</span>
+          <img src="https://i.postimg.cc/kgbw5Bb3/bc6dd0417bed320d5632e522154a227b-2.jpg" alt="Project 2">
+          <div class="content">
+            <h3 data-i18n="project2_card_title">Project 2</h3>
+            <p data-i18n="project2_card_description">Platform e-commerce dengan fitur real-time.</p>
+            <div class="button-group">
+              <button type="button" class="cool-btn view-details" data-project-id="2" data-i18n="button_detail"><div class="button-particle-container"></div>Detail</button>
+              <a href="#" class="cool-btn" target="_blank" data-i18n="button_live_demo"><div class="button-particle-container"></div>Live Demo</a>
+            </div>
+          </div>
+        </div>
+        <div class="project-card" data-project-id="3">
+          <img src="https://i.postimg.cc/kgbw5Bb3/bc6dd0417bed320d5632e522154a227b-2.jpg" alt="Project 3">
+          <div class="content">
+            <h3 data-i18n="project3_card_title">Project 3</h3>
+            <p data-i18n="project3_card_description">Sistem manajemen inventaris berbasis cloud.</p>
+            <div class="button-group">
+              <button type="button" class="cool-btn view-details" data-project-id="3" data-i18n="button_detail"><div class="button-particle-container"></div>Detail</button>
+              <a href="#" class="cool-btn" target="_blank" data-i18n="button_live_demo"><div class="button-particle-container"></div>Live Demo</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="project-modal" id="project-modal">
+      <div class="modal-content">
+        <button type="button" class="modal-close" aria-label="Close project details">&times;</button>
+        <h3 class="modal-title"></h3>
+        <p class="modal-description"></p>
+        <div class="tech-stack modal-tech-stack"></div>
+        <p class="modal-status"></p>
+        <div class="modal-buttons">
+          <a href="#" class="cool-btn modal-source" target="_blank" data-i18n="button_source_code"><div class="button-particle-container"></div>Kode Sumber</a>
+          <a href="#" class="cool-btn modal-demo" target="_blank" data-i18n="button_live_demo"><div class="button-particle-container"></div>Live Demo</a>
+        </div>
+      </div>
+    </div>
+
+    <section id="contact">
+      <h2 data-i18n="contact_heading">Kontak</h2>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <p data-i18n="contact_email_label" data-copy-target="email">📧 Email:</p>
+          <a href="mailto:ranzedtz@gmail.com" class="copy-link" data-copy-value="ranzedtz@gmail.com">ranzedtz@gmail.com</a>
+          <span class="copied-message" data-i18n="copied_message">Disalin!</span>
+        </div>
+        <div class="contact-card">
+          <p data-i18n="contact_phone_label" data-copy-target="phone">📞 Telp:</p>
+          <a href="tel:+6287784720840" class="copy-link" data-copy-value="+6287784720840">+62 877 8472 0840</a>
+          <span class="copied-message" data-i18n="copied_message">Disalin!</span>
+        </div>
+        <div class="contact-card">
+          <p data-i18n="contact_instagram_label">📸 Instagram:</p>
+          <a href="https://instagram.com/taufiqi_xyz" target="_blank">taufiqi_xyz</a>
+        </div>
+      </div>
+      <form class="contact-form" id="contactForm">
+        <input type="text" id="contactName" data-i18n-placeholder="contact_name_placeholder" placeholder="Nama" required>
+        <input type="email" id="contactEmail" data-i18n-placeholder="contact_email_placeholder" placeholder="Email" required>
+        <textarea id="contactMessage" data-i18n-placeholder="contact_message_placeholder" placeholder="Pesan" rows="4" required></textarea>
+        <button type="submit" data-i18n="button_send"><div class="button-particle-container"></div>Kirim</button>
+        <div class="contact-form-message" id="contactFormMessage"></div>
+      </form>
+    </section>
+  </div>
+
+  <script>
+    // --- THREE.JS BACKGROUND ---
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // alpha: true for transparency
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    document.querySelector('#wave-bg').appendChild(renderer.domElement);
+
+    const geometry = new THREE.PlaneGeometry(50, 50, 100, 100);
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        u_time: { value: 0 },
+        u_color_dark: { value: new THREE.Color(0xd4af37) }, // Gold for dark mode
+        u_color_light: { value: new THREE.Color(0xe0e0e8) }, // Light metal for light mode
+        is_light_mode: { value: false },
+        u_mouse: { value: new THREE.Vector2(0, 0) }, // Mouse position for interaction
+        u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        uniform float u_time;
+        uniform vec2 u_mouse;
+        uniform vec2 u_resolution;
+
+        void main() {
+          vUv = uv;
+          vNormal = normal; // Pass normal to fragment for lighting
+
+          vec3 pos = position;
+          // Basic wave
+          pos.z += sin(pos.x * 0.7 + u_time * 0.8) * 0.6 + cos(pos.y * 0.7 + u_time * 0.8) * 0.6;
+
+          // Mouse interaction (subtle warp)
+          vec2 mouse_norm = u_mouse / u_resolution - 0.5; // -0.5 to 0.5
+          float dist_to_mouse = distance(vUv, mouse_norm + 0.5); // 0 to 1 range
+          float mouse_effect = 1.0 - smoothstep(0.0, 0.4, dist_to_mouse); // Smooth falloff
+          pos.z += sin(dist_to_mouse * 15.0 + u_time * 2.0) * mouse_effect * 0.5;
+
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 u_color_dark;
+        uniform vec3 u_color_light;
+        uniform float is_light_mode;
+        uniform float u_time; /* Added u_time to fragment shader */
+        varying vec2 vUv;
+        varying vec3 vNormal; // Receive normal from vertex shader
+
+        void main() {
+          vec3 base_color = mix(u_color_dark, u_color_light, is_light_mode);
+
+          // Apply some basic lighting based on normal
+          vec3 lightDir = normalize(vec3(0.5, 0.5, 1.0)); // Example light direction
+          float diff = max(dot(vNormal, lightDir), 0.0);
+          vec3 final_color = base_color * (0.5 + diff * 0.5); // Subtle lighting
+
+          // Add a subtle color pulse over time (plasma effect)
+          float color_pulse = sin(u_time * 0.5) * 0.05 + 0.95; /* Slower pulse */
+          final_color *= color_pulse;
+
+          // Intensity based on UV for some visual texture
+          float intensity = sin(vUv.x * 12.0 + vUv.y * 12.0) * 0.2 + 0.8;
+          gl_FragColor = vec4(final_color * intensity, 0.8); /* Adjusted alpha slightly */
+        }
+      `,
+      transparent: true,
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+    camera.position.z = 15;
+
+    function animateWave() {
+      requestAnimationFrame(animateWave);
+      material.uniforms.u_time.value += 0.02;
+      renderer.render(scene, camera);
+    }
+    animateWave();
+
+    window.addEventListener('resize', () => {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      material.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+    });
+
+    // Mouse movement for Three.js interaction
+    document.addEventListener('mousemove', (e) => {
+        material.uniforms.u_mouse.value.set(e.clientX, window.innerHeight - e.clientY); // Y-axis inverted for WebGL
+    });
+
+
+    // --- TRANSLATION DATA ---
+    const translations = {
+      'id': {
+        page_title: 'Taufiq - Profil',
+        nav_home: 'Beranda',
+        nav_about: 'Tentang',
+        nav_achievements: 'Prestasi',
+        nav_skills: 'Keterampilan',
+        nav_projects: 'Project',
+        nav_contact: 'Kontak',
+        theme_toggle_title: 'Ganti Tema',
+        visits_counter_title: 'Total Kunjungan',
+        language_toggle_title: 'Ganti Bahasa',
+        voice_btn_title: 'Perintah Suara',
+        loader_greeting: '⏳ Memuat profil...',
+        loader_quotes: [
+            '💡 Inovasi adalah kunci masa depan.',
+            '💻 Setiap baris kode adalah langkah menuju kemajuan.',
+            '✨ Visi tanpa eksekusi hanyalah halusinasi.',
+            '📚 Belajar adalah proses tanpa akhir.',
+            '🎨 Kreativitas adalah kecerdasan yang bersenang-senang.',
+            '🚀 Mari wujudkan ide-ide hebat.'
+        ],
+        hero_greeting: '👋 Halo, Selamat Datang!',
+        hero_title: 'Taufiq',
+        hero_typing_words: ['Pelajar', 'Inovator', 'Pemimpin', 'Kreatif'],
+        hero_static_quote: '🤝 "Mari berkolaborasi menciptakan masa depan yang lebih cerah."',
+        button_contact: 'Hubungi',
+        button_download_cv: 'Unduh CV',
+        button_whatsapp: 'WhatsApp',
+        button_instagram: 'Instagram',
+        about_heading: 'ℹ️ Tentang',
+        about_paragraph: 'Saya Mohammad Noor Taufiqillah, akrab disapa Taufiq, pelajar kelas 12 di MA Nahdlatul Muslimin, Undaan Kidul, Kudus. Tinggal di Loram Wetan, Kecamatan Jati, Kabupaten Kudus, Jawa Tengah. Pendiam, tapi penuh semangat untuk berinovasi!',
+        achievements_heading: '🏆 Prestasi',
+        achievement1_title: 'Belum diisi',
+        achievement1_description: 'not yet.',
+        achievement2_title: 'Belum Diisi',
+        achievement2_description: 'not yet.',
+        achievement3_title: 'Belum Diisi',
+        achievement3_description: 'not yet.',
+        skills_heading: '⚙️ Keterampilan',
+        skill_public_speaking_title: '🗣️ Public Speaking',
+        skill_public_speaking_tooltip: '💪 Berbicara di depan umum dengan percaya diri',
+        skill_management_title: '📈 Manajemen',
+        skill_management_tooltip: '📋 Manajemen proyek dan waktu',
+        skill_research_title: '🔍 Research',
+        skill_research_tooltip: '📊 Penelitian dan analisis data',
+        skill_leadership_title: '👑 Leadership',
+        skill_leadership_tooltip: '👨‍👩‍👧‍👦 Memimpin tim dengan efektif',
+        skill_writing_title: '✍️ Writing',
+        skill_writing_tooltip: '📝 Menulis kreatif dan teknis',
+        skill_problem_solving_title: '🧩 Problem Solving',
+        skill_problem_solving_tooltip: '💡 Mampu menemukan solusi inovatif',
+        projects_heading: '🚀 Project',
+        project1_card_title: 'Project 1',
+        project1_card_description: 'Aplikasi web inovatif untuk meningkatkan produktivitas.',
+        project2_card_title: 'Project 2',
+        project2_card_description: 'Platform e-commerce dengan fitur real-time.',
+        project3_card_title: 'Project 3',
+        project3_card_description: 'Sistem manajemen inventaris berbasis cloud.',
+        project_new_label: 'BARU!', /* NEW */
+        button_detail: 'Detail',
+        button_live_demo: 'Live Demo',
+        button_source_code: 'Kode Sumber',
+        contact_heading: '📞 Kontak',
+        contact_email_label: '📧 Email:',
+        contact_phone_label: '📞 Telp:',
+        contact_instagram_label: '📸 Instagram:',
+        contact_name_placeholder: 'Nama',
+        contact_email_placeholder: 'Email',
+        contact_message_placeholder: 'Pesan',
+        button_send: 'Kirim',
+        alert_unknown_command: 'Perintah tidak dikenal: "{command}". Coba "beranda", "tentang", dll.',
+        project_status_label: 'Status',
+        project_status_completed: '✅ Selesai',
+        project_status_in_progress: '🚧 Dalam Pengembangan',
+        copied_message: 'Disalin!',
+        form_sending: 'Mengirim pesan...',
+        form_success: 'Pesan terkirim! Terima kasih.',
+        form_error: 'Gagal mengirim pesan. Coba lagi nanti.'
+      },
+      'en': {
+        page_title: 'Taufiq - Profile',
+        nav_home: 'Home',
+        nav_about: 'About',
+        nav_achievements: 'Achievements',
+        nav_skills: 'Skills',
+        nav_projects: 'Projects',
+        nav_contact: 'Contact',
+        theme_toggle_title: 'Toggle Theme',
+        visits_counter_title: 'Total Visits',
+        language_toggle_title: 'Change Language',
+        voice_btn_title: 'Voice Command',
+        loader_greeting: '⏳ Loading profile...',
+        loader_quotes: [
+            '💡 Innovation is the key to the future.',
+            '💻 Every line of code is a step towards progress.',
+            '✨ Vision without execution is just hallucination.',
+            '📚 Learning is an endless process.',
+            '🎨 Creativity is intelligence having fun.',
+            '🚀 Let\'s bring great ideas to life.'
+        ],
+        hero_greeting: '👋 Hello, Welcome!',
+        hero_title: 'Taufiq',
+        hero_typing_words: ['Student', 'Innovator', 'Leader', 'Creative'],
+        hero_static_quote: '🤝 "Let\'s collaborate to build a brighter future."',
+        button_contact: 'Contact Me',
+        button_download_cv: 'Download CV',
+        button_whatsapp: 'WhatsApp',
+        button_instagram: 'Instagram',
+        about_heading: 'ℹ️ About',
+        about_paragraph: 'I am Mohammad Noor Taufiqillah, known as Taufiq, a 12th-grade student at MA Nahdlatul Muslimin, Undaan Kidul, Kudus. I reside in Loram Wetan, Jati District, Kudus Regency, Central Java. I am quiet, but full of enthusiasm for innovation!',
+        achievements_heading: '🏆 Achievements',
+        achievement1_title: 'Not yet filled',
+        achievement1_description: 'not yet.',
+        achievement2_title: 'Not yet filled',
+        achievement2_description: 'not yet.',
+        achievement3_title: 'Not yet filled',
+        achievement3_description: 'not yet.',
+        skills_heading: '⚙️ Skills',
+        skill_public_speaking_title: '🗣️ Public Speaking',
+        skill_public_speaking_tooltip: '💪 Confident public speaking',
+        skill_management_title: '📈 Management',
+        skill_management_tooltip: '📋 Project and time management',
+        skill_research_title: '🔍 Research',
+        skill_research_tooltip: '📊 Data research and analysis',
+        skill_leadership_title: '👑 Leadership',
+        skill_leadership_tooltip: '👨‍👩‍👧‍👦 Effectively leading teams',
+        skill_writing_title: '✍️ Writing',
+        skill_writing_tooltip: '📝 Creative and technical writing',
+        skill_problem_solving_title: '🧩 Problem Solving',
+        skill_problem_solving_tooltip: '💡 Ability to find innovative solutions',
+        projects_heading: '🚀 Projects',
+        project1_card_title: 'Project 1',
+        project1_card_description: 'Innovative web application for productivity.',
+        project2_card_title: 'Project 2',
+        project2_card_description: 'E-commerce platform with real-time features.',
+        project3_card_title: 'Project 3',
+        project3_card_description: 'Cloud-based inventory management system.',
+        project_new_label: 'NEW!', /* NEW */
+        button_detail: 'Detail',
+        button_live_demo: 'Live Demo',
+        button_source_code: 'Source Code',
+        contact_heading: '📞 Contact',
+        contact_email_label: '📧 Email:',
+        contact_phone_label: '📞 Phone:',
+        contact_instagram_label: '📸 Instagram:',
+        contact_name_placeholder: 'Name',
+        contact_email_placeholder: 'Email',
+        contact_message_placeholder: 'Message',
+        button_send: 'Send',
+        alert_unknown_command: 'Unknown command: "{command}". Try "home", "about", etc.',
+        project_status_label: 'Status',
+        project_status_completed: '✅ Completed',
+        project_status_in_progress: '🚧 In Development',
+        copied_message: 'Copied!',
+        form_sending: 'Sending message...',
+        form_success: 'Message sent! Thank you.',
+        form_error: 'Failed to send message. Please try again later.'
+      }
+    };
+
+    const projectModalData = {
+      1: {
+        id: {
+          title: 'Project Inovatif',
+          description: 'Aplikasi web inovatif yang dirancang untuk meningkatkan produktivitas pengguna melalui antarmuka yang intuitif dan fitur otomatisasi canggih.',
+          status_key: 'project_status_completed'
+        },
+        en: {
+          title: 'Innovative Project',
+          description: 'An innovative web application designed to enhance user productivity through an intuitive interface and advanced automation features.',
+          status_key: 'project_status_completed'
+        },
+        tech: ['HTML', 'CSS', 'JavaScript', 'Responsive Design'],
+        source: '#',
+        demo: '#',
+      },
+      2: {
+        id: {
+          title: 'E-commerce Real-time',
+          description: 'Platform e-commerce dengan fitur real-time untuk transaksi cepat dan pengalaman pengguna yang mulus. Mengintegrasikan pembayaran online dan pelacakan pesanan secara langsung.',
+          status_key: 'project_status_in_progress'
+        },
+        en: {
+          title: 'Real-time E-commerce',
+          description: 'An e-commerce platform with real-time features for fast transactions and a seamless user experience. Integrates online payments and live order tracking.',
+          status_key: 'project_status_in_progress'
+        },
+        tech: ['React', 'Node.js', 'MongoDB', 'Socket.IO'],
+        source: '#',
+        demo: '#',
+      },
+      3: {
+        id: {
+          title: 'Sistem Inventaris Cloud',
+          description: 'Sistem manajemen inventaris berbasis cloud yang membantu bisnis melacak aset, mengelola stok, dan menghasilkan laporan secara efisien. Dirancang dengan keamanan data sebagai prioritas utama.',
+          status_key: 'project_status_completed'
+        },
+        en: {
+          title: 'Cloud Inventory System',
+          description: 'A cloud-based inventory management system that helps businesses track assets, manage stock, and generate reports efficiently. Designed with data security as a top priority.',
+          status_key: 'project_status_completed'
+        },
+        tech: ['Python', 'Django', 'PostgreSQL', 'AWS'],
+        source: '#',
+        demo: '#',
+      }
+    };
+
+    let currentLanguage = localStorage.getItem('language') || 'id';
+
+    // --- LANGUAGE SWITCHING FUNCTION ---
+    function setLanguage(lang) {
+      document.documentElement.lang = lang;
+      currentLanguage = lang;
+      localStorage.setItem('language', lang);
+
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+          element.innerHTML = translations[lang][key]; // Use innerHTML for emoji content
+        }
+      });
+
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        if (translations[lang] && translations[lang][key]) {
+          element.placeholder = translations[lang][key];
+        }
+      });
+
+      document.querySelectorAll('[data-i18n-title]').forEach(element => {
+        const key = element.getAttribute('data-i18n-title');
+        if (translations[lang] && translations[lang][key]) {
+          element.title = translations[lang][key];
+        }
+      });
+
+      // Update hero typing text
+      const heroTypingTextElement = document.querySelector('.typing-text');
+      if (heroTypingTextElement) {
+        // Clear existing timeout to prevent multiple type animations
+        if (typingInterval) clearTimeout(typingInterval);
+        words.length = 0; // Clear existing words
+        translations[lang].hero_typing_words.forEach(word => words.push(word));
+        charIndex = 0;
+        isDeleting = false;
+        wordIndex = 0;
+        heroTypingTextElement.textContent = '';
+        // Restart typing animation after setting new words
+        // Only start if loader is already hidden, otherwise it will start after loader
+        if (document.querySelector('.loader').classList.contains('hidden')) {
+            typingInterval = setTimeout(type, 50); // Faster initial character type
+        }
+      }
+
+      const heroH1 = document.querySelector('.hero h1');
+      if (heroH1) {
+          heroH1.setAttribute('data-original-text', translations[lang].hero_title);
+      }
+
+      const languageToggleBtn = document.getElementById('language-toggle-btn');
+      if (languageToggleBtn) {
+        languageToggleBtn.textContent = (lang === 'id' ? 'EN' : 'ID'); // No emoji for language button
+      }
+
+      document.title = translations[lang].page_title;
+
+      // Update loader specific texts (BUG FIX: always update if loader is visible)
+      const loaderIsHidden = document.querySelector('.loader').classList.contains('hidden');
+      if (!loaderIsHidden) { // Only update if loader is currently visible
+          if (loaderMessage) loaderMessage.innerHTML = translations[lang].loader_greeting;
+          if (loaderQuote) {
+              const quotes = translations[lang].loader_quotes;
+              const quoteInterval = 100 / quotes.length;
+              let currentProgress = parseFloat(progressBarFill.style.width || '0');
+              let currentQuoteIndex = Math.floor(currentProgress / quoteInterval);
+              if (currentQuoteIndex >= quotes.length) {
+                  currentQuoteIndex = quotes.length - 1;
+              }
+              loaderQuote.innerHTML = quotes[currentQuoteIndex];
+          }
+      }
+
+      // Re-apply skill bar tooltips and contact card labels which now contain span for emojis
+      document.querySelectorAll('.skill-bar .tooltip, .contact-card p, .modal-status, .project-new-badge').forEach(element => {
+          const key = element.getAttribute('data-i18n');
+          // For contact-card p, the text content might be the label, not the value.
+          // For project-new-badge, it's just the label.
+          if (key && translations[lang] && translations[lang][key]) {
+              if (element.tagName === 'P' && element.hasAttribute('data-copy-target')) {
+                  // Only update the label part, not the whole P which includes <a> and <span>
+                  // The email/phone value is in the <a> tag's data-copy-value.
+                  element.innerHTML = translations[lang][key];
+              } else {
+                  element.innerHTML = translations[lang][key];
+              }
+          }
+      });
+
+      // Update skill percentages
+      document.querySelectorAll('.skill-bar').forEach(bar => {
+          const progressWidth = bar.getAttribute('data-progress');
+          const skillPercentageSpan = bar.querySelector('.skill-percentage');
+          if (skillPercentageSpan) {
+              skillPercentageSpan.textContent = `${progressWidth}%`; // Ensure text is set
+              // No need to set visible class here, as it's handled by IntersectionObserver
+          }
+      });
+
+      // Re-apply copied messages (just the text content)
+      document.querySelectorAll('.copied-message').forEach(element => {
+          element.textContent = translations[lang].copied_message;
+      });
+
+      // Re-apply contact form messages
+      if (contactFormMessage.classList.contains('show')) {
+          const status = contactFormMessage.classList.contains('success') ? 'success' : 'error';
+          contactFormMessage.textContent = translations[lang][status === 'success' ? 'form_success' : 'form_error'];
+      } else if (contactFormButton.disabled) { // If sending, update sending message
+          contactFormMessage.textContent = translations[lang].form_sending;
+      }
+    }
+
+    // --- TYPING ANIMATION ---
+    const typingText = document.querySelector('.typing-text');
+    let words = []; // This will be populated by setLanguage
+    let wordIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    let typingInterval = null;
+
+    function type() {
+      if (!typingText || words.length === 0) {
+        typingInterval = null; // Stop interval if no words or element
+        return;
+      }
+
+      const currentWord = words[wordIndex];
+      if (!isDeleting) {
+        typingText.textContent = currentWord.substring(0, charIndex + 1);
+        charIndex++;
+        if (charIndex === currentWord.length) {
+          isDeleting = true;
+          typingInterval = setTimeout(type, 800); // FASTER pause after word
+        } else {
+          typingInterval = setTimeout(type, 50); // FASTER char typing speed
+        }
+      } else {
+        typingText.textContent = currentWord.substring(0, charIndex - 1);
+        charIndex--;
+        if (charIndex === 0) {
+          isDeleting = false;
+          wordIndex = (wordIndex + 1) % words.length;
+          typingInterval = setTimeout(type, 250); // FASTER pause after deleting
+        } else {
+          typingInterval = setTimeout(type, 50); // FASTER char deleting speed
+        }
+      }
+    }
+
+    // --- SKILL BAR ANIMATION ON SCROLL ---
+    const skillBars = document.querySelectorAll('.skill-bar');
+    const skillObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const progress = entry.target.querySelector('.progress');
+          const progressWidth = entry.target.getAttribute('data-progress');
+          progress.style.setProperty('--progress-width', progressWidth + '%');
+          progress.classList.add('filled');
+
+          const skillPercentageSpan = entry.target.querySelector('.skill-percentage');
+          if (skillPercentageSpan) {
+              skillPercentageSpan.textContent = `${progressWidth}%`; // Ensure text is set
+              entry.target.classList.add('visible'); // Trigger opacity for percentage
+          }
+          skillObserver.unobserve(entry.target);
+        } else {
+            entry.target.classList.remove('visible'); // Remove visible class when out of view
+            // Optionally reset progress if you want them to re-animate on scroll up/down
+            // entry.target.querySelector('.progress').classList.remove('filled');
+        }
+      });
+    }, { threshold: 0.4 });
+
+    skillBars.forEach(bar => skillObserver.observe(bar));
+
+    // --- INTERACTIVE CARD HOVER (LIGHT REFLECTION) ---
+    const interactiveCards = document.querySelectorAll('.about-card, .achievement-card, .skill-bar, .contact-card, .project-card');
+
+    interactiveCards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width * 100; // X in percentage
+            const y = (e.clientY - rect.top) / rect.height * 100; // Y in percentage
+            card.style.setProperty('--mouse-x', `${x}%`);
+            card.style.setProperty('--mouse-y', `${y}%`);
+        });
+    });
+
+    // --- THEME TOGGLE (LIGHT/DARK MODE) ---
+    const body = document.body;
+    const themeBtn = document.querySelector('#theme-toggle-btn');
+    const burstContainer = document.querySelector('.theme-burst');
+
+    function createBurst(x, y) {
+      const count = 8;
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('burst-particle');
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        burstContainer.appendChild(particle);
+
+        const speed = Math.random() * 50 + 20;
+        const angle = (Math.PI * 2 * i) / count;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+        let opacity = 0.8;
+
+        function animateBurst() {
+          x += vx * 0.02;
+          y += vy * 0.02;
+          opacity -= 0.02;
+          particle.style.left = `${x}px`;
+          particle.style.top = `${y}px`;
+          particle.style.opacity = opacity;
+          if (opacity <= 0) particle.remove();
+          else requestAnimationFrame(animateBurst);
+        }
+        animateBurst();
+      }
+    }
+
+    function toggleTheme() {
+      const rect = themeBtn.getBoundingClientRect();
+      createBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      if (body.classList.contains('light-mode')) {
+        body.classList.remove('light-mode');
+        themeBtn.textContent = '☾';
+        localStorage.setItem('theme', 'dark');
+        material.uniforms.is_light_mode.value = false;
+        navigator.vibrate && navigator.vibrate([10, 10, 10]);
+      } else {
+        body.classList.add('light-mode');
+        themeBtn.textContent = '☀';
+        localStorage.setItem('theme', 'light');
+        material.uniforms.is_light_mode.value = true;
+        navigator.vibrate && navigator.vibrate([20, 10, 20]);
+      }
+      // Update theme toggle title after changing textContent
+      themeBtn.title = translations[currentLanguage]['theme_toggle_title'];
+    }
+
+    // Initialize theme based on localStorage
+    if (localStorage.getItem('theme') === 'light') {
+      body.classList.add('light-mode');
+      themeBtn.textContent = '☀';
+      if (material && material.uniforms.is_light_mode) {
+          material.uniforms.is_light_mode.value = true;
+      }
+    }
+    // Set initial title for theme toggle button
+    themeBtn.title = translations[currentLanguage]['theme_toggle_title'];
+
+    themeBtn.addEventListener('click', toggleTheme);
+
+
+    // --- LOADER HIDE & PROGRESS BAR LOGIC (BUG FIXES) ---
+    const loader = document.querySelector('.loader');
+    const progressBarFill = document.getElementById('progressBarFill');
+    const loaderMessage = document.querySelector('.loader-message');
+    const loaderQuote = document.getElementById('loaderQuote');
+
+    const totalLoadingTime = 3000; // 3 seconds
+    let startTime = null;
+
+    function animateLoader(currentTime) {
+        if (!startTime) startTime = currentTime;
+        const elapsedTime = currentTime - startTime;
+
+        let progress = (elapsedTime / totalLoadingTime) * 100;
+        if (progress > 100) progress = 100;
+
+        progressBarFill.style.width = `${progress}%`;
+
+        // Update loader message and quote, ensuring correct translation
+        loaderMessage.innerHTML = translations[currentLanguage].loader_greeting;
+        const quotes = translations[currentLanguage].loader_quotes;
+        const quoteInterval = 100 / quotes.length;
+        let currentQuoteIndex = Math.floor(progress / quoteInterval);
+        if (currentQuoteIndex >= quotes.length) {
+            currentQuoteIndex = quotes.length - 1;
+        }
+        loaderQuote.innerHTML = quotes[currentQuoteIndex];
+
+        // Ensure loader message and quote fade in
+        loaderMessage.style.opacity = 1;
+        loaderQuote.style.opacity = 1;
+
+        if (progress < 100) {
+            requestAnimationFrame(animateLoader);
+        } else {
+            loader.classList.add('hidden');
+            loader.addEventListener('transitionend', () => {
+                loader.style.display = 'none';
+                if (typingText && words.length > 0) { // Only start typing if words are ready and loader is gone
+                    type();
+                }
+            }, { once: true });
+        }
+    }
+
+    // --- NAVIGATION MENU TOGGLE ---
+    const menuToggle = document.querySelector('#hamburger');
+    const navMenu = document.querySelector('#nav-menu');
+    if (menuToggle && navMenu) {
+      menuToggle.addEventListener('click', () => {
+        menuToggle.classList.toggle('active');
+        navMenu.classList.toggle('active');
+        navigator.vibrate && navigator.vibrate(30);
+      });
+    }
+
+    // --- SMOOTH SCROLLING FOR NAV LINKS ---
+    document.querySelectorAll('.nav-menu a, .cool-btn[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = anchor.getAttribute('href').substring(1);
+        const target = document.querySelector('#' + targetId);
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+          if (navMenu.classList.contains('active')) {
+            navMenu.classList.remove('active');
+            menuToggle.classList.remove('active');
+          }
+          navigator.vibrate && navigator.vibrate(20);
+        }
+      });
+    });
+
+    // --- CURSOR TRAIL EFFECT (FOR TOUCH DEVICES) ---
+    const trailContainer = document.querySelector('.cursor-trail');
+    let lastTouch = { x: 0, y: 0, time: 0 };
+    function createTrail(x, y) {
+      const particle = document.createElement('div');
+      particle.classList.add('trail-particle');
+      particle.style.left = `${x}px`;
+      particle.style.top = `${y}px`;
+      trailContainer.appendChild(particle);
+
+      const speed = Math.random() * 30 + 20;
+      const angle = Math.random() * Math.PI * 2;
+      const vx = Math.cos(angle) * speed;
+      const vy = Math.sin(angle) * speed;
+      let opacity = 0.8;
+
+      function animateTrail() {
+        x += vx * 0.02;
+        y += vy * 0.02;
+        opacity -= 0.01;
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        particle.style.opacity = opacity;
+        if (opacity <= 0) particle.remove();
+        else requestAnimationFrame(animateTrail);
+      }
+      animateTrail();
+    }
+
+    document.addEventListener('touchmove', (e) => {
+      const touch = e.touches[0];
+      const now = Date.now();
+      // Throttling touch trail creation
+      if (now - lastTouch.time > 50 && Math.random() < 0.5) { // Emit every 50ms with 50% chance
+        createTrail(touch.clientX, touch.clientY);
+        lastTouch = { x: touch.clientX, y: touch.clientY, time: now };
+      }
+    });
+
+    // --- VOICE COMMAND BUTTON ---
+    const voiceBtn = document.querySelector('#voice-btn');
+    let recognition;
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.lang = currentLanguage === 'id' ? 'id-ID' : 'en-US';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      voiceBtn.addEventListener('click', () => {
+        try {
+          voiceBtn.classList.add('listening');
+          recognition.start();
+          navigator.vibrate && navigator.vibrate([50, 20, 50]);
+        } catch (err) {
+          console.error('Speech Recognition Error:', err);
+          voiceBtn.classList.remove('listening');
+          alert('Failed to start speech recognition. Make sure your browser supports it and you\'ve granted microphone permissions.');
+        }
+      });
+
+      recognition.onresult = (event) => {
+        const command = event.results[0][0].transcript.toLowerCase();
+        voiceBtn.classList.remove('listening');
+        const translatedAlert = translations[currentLanguage].alert_unknown_command.replace('{command}', command);
+
+        if (command.includes('beranda') || command.includes('home')) {
+          document.querySelector('#hero').scrollIntoView({ behavior: 'smooth' });
+        } else if (command.includes('tentang') || command.includes('about')) {
+          document.querySelector('#about').scrollIntoView({ behavior: 'smooth' });
+        } else if (command.includes('prestasi') || command.includes('achievements')) {
+          document.querySelector('#achievements').scrollIntoView({ behavior: 'smooth' });
+        } else if (command.includes('keterampilan') || command.includes('skill')) {
+          document.querySelector('#skills').scrollIntoView({ behavior: 'smooth' });
+        } else if (command.includes('project') || command.includes('proyek')) {
+          document.querySelector('#projects').scrollIntoView({ behavior: 'smooth' });
+        } else if (command.includes('kontak') || command.includes('contact')) {
+          document.querySelector('#contact').scrollIntoView({ behavior: 'smooth' });
+        } else {
+            alert(translatedAlert);
+        }
+      };
+
+      recognition.onend = () => {
+        voiceBtn.classList.remove('listening');
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech Recognition Error:', event.error);
+        voiceBtn.classList.remove('listening');
+        // Only show an alert if it's not a "no-speech" or "aborted" error, which are common
+        if (event.error !== 'no-speech' && event.error !== 'aborted') {
+            alert('Speech recognition error: ' + event.error);
+        }
+      };
+    } else {
+      voiceBtn.style.display = 'none';
+      console.warn('Speech Recognition API not supported in this browser.');
+    }
+
+    // --- SHAKE TO TOGGLE THEME (Device Motion) ---
+    let lastShake = 0;
+    window.addEventListener('devicemotion', (e) => {
+      // Check for presence of acceleration data
+      const accel = e.accelerationIncludingGravity || {};
+      if (accel.x !== null && accel.y !== null && accel.z !== null) {
+        const now = Date.now();
+        // Throttle shake events to prevent rapid toggling
+        if (now - lastShake > 1000) {
+          const force = Math.sqrt(accel.x * accel.x + accel.y * accel.y + accel.z * accel.z);
+          // A threshold of 20 is a common value for a noticeable shake
+          if (force > 20) {
+            toggleTheme();
+            lastShake = now;
+          }
+        }
+      }
+    });
+
+    // --- SECTION VISIBILITY & H2 GLITCH ANIMATION ON SCROLL ---
+    const sections = document.querySelectorAll('section');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          const h2 = entry.target.querySelector('h2');
+          if (h2 && !h2.classList.contains('glitch-active')) {
+            h2.setAttribute('data-text', h2.textContent);
+            h2.classList.add('glitch-active');
+            // Remove glitch after animation to allow periodic glitch to take over
+            setTimeout(() => {
+              h2.classList.remove('glitch-active');
+            }, 500);
+            // Optionally, add a periodic glitch
+            if (!h2.dataset.glitchInterval) {
+                h2.dataset.glitchInterval = setInterval(() => {
+                    if (h2.closest('section.visible')) { // Only glitch if its section is still in view
+                        h2.classList.add('glitch-active');
+                        setTimeout(() => h2.classList.remove('glitch-active'), 300);
+                    }
+                }, 3000 + Math.random() * 2000); // Glitch every 3-5 seconds
+            }
+          }
+          navigator.vibrate && navigator.vibrate(15);
+        } else {
+            entry.target.classList.remove('visible'); // Remove visible class when out of view
+            const h2 = entry.target.querySelector('h2');
+            if (h2 && h2.dataset.glitchInterval) {
+                clearInterval(parseInt(h2.dataset.glitchInterval));
+                delete h2.dataset.glitchInterval;
+                h2.classList.remove('glitch-active'); // Ensure no active glitch
+            }
+        }
+      });
+    }, { threshold: 0.2 });
+
+    sections.forEach(section => observer.observe(section));
+
+    // --- PROJECT MODAL LOGIC ---
+    const modal = document.querySelector('#project-modal');
+    const modalContent = modal.querySelector('.modal-content');
+    const modalClose = modal.querySelector('.modal-close');
+    const viewDetailsButtons = document.querySelectorAll('.view-details');
+
+    viewDetailsButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const projectId = button.getAttribute('data-project-id');
+        const project = projectModalData[projectId];
+
+        if (project) {
+            modalContent.querySelector('.modal-title').textContent = project[currentLanguage].title;
+            modalContent.querySelector('.modal-description').textContent = project[currentLanguage].description;
+
+            const statusLabel = translations[currentLanguage].project_status_label;
+            const statusText = translations[currentLanguage][project[currentLanguage].status_key];
+            modalContent.querySelector('.modal-status').innerHTML = `${statusLabel}: ${statusText}`;
+
+            const techContainer = modalContent.querySelector('.modal-tech-stack');
+            techContainer.innerHTML = project.tech.map(tech => `<span class="tech-badge">${tech}</span>`).join('');
+
+            const sourceButton = modalContent.querySelector('.modal-source');
+            const demoButton = modalContent.querySelector('.modal-demo');
+            sourceButton.href = project.source;
+            demoButton.href = project.demo;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            navigator.vibrate && navigator.vibrate(20);
+        }
+      });
+    });
+
+    modalClose.addEventListener('click', () => {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      navigator.vibrate && navigator.vibrate(20);
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        navigator.vibrate && navigator.vibrate(20);
+      }
+    });
+
+    // --- VISITS COUNTER LOGIC ---
+    const visitCountDisplay = document.getElementById('visit-count-display');
+    const STORAGE_KEY_VISITS = 'taufiq_profile_visits';
+
+    function updateVisitCount() {
+        let count = parseInt(localStorage.getItem(STORAGE_KEY_VISITS) || '0', 10);
+        count++;
+        localStorage.setItem(STORAGE_KEY_VISITS, count);
+        visitCountDisplay.textContent = count;
+    }
+
+    // --- SCROLL-TO-TOP BUTTON LOGIC ---
+    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 200) { // Show button after scrolling down 200px
+            scrollToTopBtn.classList.add('show');
+        } else {
+            scrollToTopBtn.classList.remove('show');
+        }
+    });
+    scrollToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+        navigator.vibrate && navigator.vibrate(20);
+    });
+
+    // --- CONTACT CARD COPY-TO-CLIPBOARD LOGIC ---
+    document.querySelectorAll('.contact-card p[data-copy-target]').forEach(pElement => {
+        const linkElement = pElement.nextElementSibling; // The <a> tag right after <p>
+        const copiedMessage = pElement.parentElement.querySelector('.copied-message');
+
+        if (linkElement && linkElement.classList.contains('copy-link')) {
+            pElement.addEventListener('click', async () => {
+                const textToCopy = linkElement.getAttribute('data-copy-value');
+                try {
+                    await navigator.clipboard.writeText(textToCopy);
+                    copiedMessage.classList.add('show');
+                    navigator.vibrate && navigator.vibrate(10);
+                    setTimeout(() => {
+                        copiedMessage.classList.remove('show');
+                    }, 1000); // FASTER hide
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    // Fallback for browsers that might not support clipboard API or permissions denied
+                    // A more robust fallback would involve creating a temporary textarea
+                    alert(translations[currentLanguage].form_error); // Re-use an existing error message for simplicity
+                }
+            });
+        }
+    });
+
+    // --- CONTACT FORM SUBMISSION SIMULATION ---
+    const contactForm = document.getElementById('contactForm');
+    const contactFormMessage = document.getElementById('contactFormMessage');
+    const contactFormButton = contactForm.querySelector('button[type="submit"]');
+
+    contactForm.addEventListener('submit', (e) => {
+        e.preventDefault(); // Prevent actual form submission
+
+        contactFormMessage.classList.remove('success', 'error', 'show');
+        contactFormMessage.textContent = translations[currentLanguage].form_sending;
+        contactFormMessage.classList.add('show');
+        contactFormButton.disabled = true; // Disable button during sending
+        navigator.vibrate && navigator.vibrate(30);
+
+        // Simulate API call
+        setTimeout(() => {
+            const success = Math.random() > 0.2; // 80% chance of success
+
+            if (success) {
+                contactFormMessage.textContent = translations[currentLanguage].form_success;
+                contactFormMessage.classList.add('success');
+                contactForm.reset(); // Clear form fields
+            } else {
+                contactFormMessage.textContent = translations[currentLanguage].form_error;
+                contactFormMessage.classList.add('error');
+            }
+
+            contactFormButton.disabled = false; // Re-enable button
+            navigator.vibrate && navigator.vibrate(20);
+
+            setTimeout(() => {
+                contactFormMessage.classList.remove('show');
+            }, 1500); // FASTER hide message
+        }, 1000); // FASTER Simulate 1-second network request
+    });
+
+    // --- BUTTON PARTICLE EMISSION ---
+    document.querySelectorAll('.cool-btn').forEach(button => {
+        const particleContainer = button.querySelector('.button-particle-container');
+        // Check if the container exists before adding event listeners
+        if (particleContainer) {
+            button.addEventListener('mouseenter', () => {
+                // Clear existing particles to prevent buildup
+                particleContainer.innerHTML = '';
+                for (let i = 0; i < 15; i++) { // Emit 15 particles
+                    const particle = document.createElement('div');
+                    particle.classList.add('button-particle');
+                    const size = Math.random() * 4 + 2; // size between 2 and 6px
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+
+                    const startX = (Math.random() * 80) + 10; // Start near center-ish (10-90%)
+                    const startY = (Math.random() * 80) + 10;
+                    particle.style.left = `${startX}%`;
+                    particle.style.top = `${startY}%`;
+
+                    // Random direction and distance for each particle
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.random() * 40 + 20; // 20-60px
+                    const dx = Math.cos(angle) * distance;
+                    const dy = Math.sin(angle) * distance;
+
+                    particle.style.setProperty('--dx', `${dx}px`);
+                    particle.style.setProperty('--dy', `${dy}px`);
+                    particle.style.animationDelay = `${Math.random() * 0.2}s`; // Stagger animation
+                    particleContainer.appendChild(particle);
+                }
+            });
+        }
+    });
+
+
+    // --- INITIALIZATION ON DOM CONTENT LOADED ---
+    document.addEventListener('DOMContentLoaded', () => {
+      updateVisitCount();
+      // Call setLanguage first to ensure translations and words array are populated
+      setLanguage(currentLanguage);
+
+      // Now, start the loader animation after language is set
+      requestAnimationFrame(animateLoader);
+
+      const languageToggleBtn = document.getElementById('language-toggle-btn');
+      if (languageToggleBtn) {
+        languageToggleBtn.addEventListener('click', () => {
+          const newLang = (currentLanguage === 'id' ? 'en' : 'id');
+          setLanguage(newLang);
+          if (typeof recognition !== 'undefined') {
+              recognition.lang = newLang === 'id' ? 'id-ID' : 'en-US';
+          }
+          navigator.vibrate && navigator.vibrate(20);
+        });
+      }
+    });
+
+  </script>
+</body>
+</html>
